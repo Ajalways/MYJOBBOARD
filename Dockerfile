@@ -27,8 +27,8 @@ RUN adduser -S nextjs -u 1001
 RUN chown -R nextjs:nodejs /app
 USER nextjs
 
-# Expose port 3001 (backend server port)
-EXPOSE 3001
+# Expose port 8080 (deployment standard port)
+EXPOSE 8080
 
 # Start the application
 CMD ["npm", "start"]

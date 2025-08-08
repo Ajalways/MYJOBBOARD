@@ -23,7 +23,20 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3001;
+
+// Port configuration - prioritize deployment port 8080, then 5000, then 3001
+const PORT = process.env.PORT || 8080;
+
+// Validate required environment variables
+if (!process.env.JWT_SECRET) {
+  console.error('❌ JWT_SECRET environment variable is required');
+  process.exit(1);
+}
+
+// OpenAI API key validation (optional - warn if missing but don't crash)
+if (!process.env.OPENAI_API_KEY) {
+  console.warn('⚠️  OPENAI_API_KEY not set - AI challenge features will be disabled');
+}
 
 // Rate limiting
 const limiter = rateLimit({

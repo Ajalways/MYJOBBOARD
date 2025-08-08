@@ -2,21 +2,43 @@
 
 ## ✅ Your App is Ready!
 Your job board is **100% functional** with:
-- Complete admin panel with AI challenge generation
+- Complete admin panel with AI challenge generation powered by OpenAI
 - Dynamic form management
 - Full job posting and application system
 - Candidate browsing and profile management
 - Payment integration
 - No placeholders or "coming soon" messages
 
-## Step 1: Install Node.js (Required)
+## Prerequisites
 
-1. Download Node.js from: https://nodejs.org/
-2. Install the LTS version (recommended)
-3. Restart your command prompt/PowerShell after installation
-4. Verify installation: `node --version` and `npm --version`
+1. **Node.js LTS** (Required)
+2. **Environment Variables** (See Environment Setup section)
+3. **OpenAI API Key** (Optional but recommended for AI features)
 
-## Step 2: Set Up Your Project
+## 🚀 Quick Deployment
+
+### Required Environment Variables
+
+Your deployment platform needs these environment variables:
+
+```bash
+# Required
+JWT_SECRET="your-super-secure-jwt-secret-key-here"
+
+# Optional but recommended for AI features
+OPENAI_API_KEY="sk-proj-your-openai-api-key-here"
+
+# Auto-configured by most platforms
+PORT=8080
+NODE_ENV="production"
+```
+
+### Getting API Keys
+
+1. **JWT Secret**: Generate with `openssl rand -base64 32` or use any secure random string
+2. **OpenAI API Key**: Get from https://platform.openai.com/api-keys
+
+## Step 1: Environment Configuration
 
 Once Node.js is installed, run these commands in PowerShell:
 
