@@ -17,4 +17,6 @@ apps:
   - key: PORT
     value: "8080"
   - key: DATABASE_URL
-    value: file:./prisma/dev.db
+    value: file:./dev.db
+  - key: JWT_SECRET
+    value: "your-super-secret-jwt-key-change-this-in-production-8a7d9c1e2f3b4a5c6d7e8f9a0b1c2d3e"
