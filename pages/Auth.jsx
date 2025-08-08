@@ -57,13 +57,23 @@ export default function Auth() {
     setError('');
 
     try {
-      const response = await apiClient.register(registerForm);
+      // Transform the data to match backend expectations
+      const registrationData = {
+        ...registerForm,
+        full_name: registerForm.name, // Backend expects full_name
+        role: registerForm.role.toUpperCase() // Backend expects uppercase role
+      };
+      
+      // Remove the old 'name' field
+      delete registrationData.name;
+      
+      const response = await apiClient.register(registrationData);
       
       if (response.token) {
         localStorage.setItem('auth_token', response.token);
         
         // Redirect based on user role
-        if (response.user.role === 'company') {
+        if (response.user.role === 'COMPANY') {
           window.location.href = createPageUrl("CompanyDashboard");
         } else {
           window.location.href = createPageUrl("JobseekerDashboard");
