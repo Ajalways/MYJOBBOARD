@@ -32,9 +32,11 @@ router.post('/register', async (req, res) => {
     }
 
     // Hash password
+    console.log('🔒 Hashing password...');
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create user
+    console.log('👤 Creating user with data:', { email, role, full_name });
     const userData = {
       email,
       password: hashedPassword,
@@ -44,6 +46,7 @@ router.post('/register', async (req, res) => {
 
     // Add role-specific data
     if (role === 'COMPANY') {
+      console.log('🏢 Adding company data...');
       userData.company_name = additionalData.company_name;
       userData.company_size = additionalData.company_size;
       userData.industry = additionalData.industry;
@@ -51,6 +54,7 @@ router.post('/register', async (req, res) => {
       userData.website = additionalData.website;
     }
 
+    console.log('💾 Creating user in database...');
     const user = await req.prisma.user.create({
       data: userData,
       select: {
@@ -63,21 +67,26 @@ router.post('/register', async (req, res) => {
         company_name: true
       }
     });
+    console.log('✅ User created:', user.id);
 
     // Create jobseeker bio if needed
     if (role === 'JOBSEEKER') {
+      console.log('📝 Creating jobseeker bio...');
       await req.prisma.jobseekerBio.create({
         data: { user_id: user.id }
       });
+      console.log('✅ Jobseeker bio created');
     }
 
     // Generate token
+    console.log('🔑 Generating JWT token...');
     const token = jwt.sign(
       { userId: user.id },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
+    console.log('🎉 Registration successful for user:', user.email);
     res.status(201).json({
       user,
       token,
