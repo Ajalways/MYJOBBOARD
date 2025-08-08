@@ -8,7 +8,18 @@ const router = express.Router();
 // Register
 router.post('/register', async (req, res) => {
   try {
+    console.log('Registration attempt:', { 
+      body: req.body, 
+      headers: req.headers['content-type'] 
+    });
+    
     const { email, password, full_name, role, ...additionalData } = req.body;
+
+    // Validate required fields
+    if (!email || !password) {
+      console.log('❌ Missing required fields:', { email: !!email, password: !!password, full_name: !!full_name });
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
 
     // Check if user exists
     const existingUser = await req.prisma.user.findUnique({
@@ -16,6 +27,7 @@ router.post('/register', async (req, res) => {
     });
 
     if (existingUser) {
+      console.log('❌ User already exists:', email);
       return res.status(400).json({ error: 'User already exists' });
     }
 
@@ -73,7 +85,12 @@ router.post('/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: 'Registration failed' });
+    console.error('Error stack:', error.stack);
+    console.error('Request body:', req.body);
+    res.status(500).json({ 
+      error: 'Registration failed',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
