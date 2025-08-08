@@ -122,15 +122,6 @@ export default function Auth() {
                   {loading ? 'Signing in...' : 'Sign In'}
                 </Button>
               </form>
-              
-              <div className="mt-4 p-3 bg-slate-100 rounded-lg">
-                <p className="text-sm font-medium text-slate-700 mb-2">Test Accounts:</p>
-                <div className="text-xs text-slate-600 space-y-1">
-                  <div>Admin: admin@test.com / admin123</div>
-                  <div>Company: company@test.com / company123</div>
-                  <div>Jobseeker: user@test.com / user123</div>
-                </div>
-              </div>
             </TabsContent>
             
             <TabsContent value="register">

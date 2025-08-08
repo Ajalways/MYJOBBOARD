@@ -3,11 +3,13 @@ import { User, JobPost, JobApplication } from '@/api/entities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileText, Clock, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { FileText, Clock, CheckCircle, XCircle, Eye, ChevronDown, ChevronUp } from 'lucide-react';
+import ChallengeSubmission from '@/components/challenges/ChallengeSubmission';
 
 export default function MyApplications() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedChallenges, setExpandedChallenges] = useState({});
 
   useEffect(() => {
     let isMounted = true;
@@ -58,6 +60,13 @@ export default function MyApplications() {
       isMounted = false;
     };
   }, []);
+
+  const toggleChallenges = (applicationId) => {
+    setExpandedChallenges(prev => ({
+      ...prev,
+      [applicationId]: !prev[applicationId]
+    }));
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -179,6 +188,35 @@ export default function MyApplications() {
                       <p className="text-sm text-slate-600">{application.notes}</p>
                     </div>
                   )}
+
+                  {/* Challenge Section */}
+                  <div className="mt-4 pt-4 border-t">
+                    <Button
+                      variant="ghost"
+                      onClick={() => toggleChallenges(application.id)}
+                      className="w-full justify-between p-0 h-auto font-medium text-left"
+                    >
+                      <span>Assessment Challenges</span>
+                      {expandedChallenges[application.id] ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </Button>
+                    
+                    {expandedChallenges[application.id] && (
+                      <div className="mt-4">
+                        <ChallengeSubmission
+                          jobId={application.job_post_id}
+                          applicationId={application.id}
+                          onSubmissionComplete={(result) => {
+                            console.log('Challenge submitted:', result);
+                            // Optionally refresh applications or show success message
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}

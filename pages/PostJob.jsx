@@ -11,8 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Briefcase, ArrowLeft, Loader2, Save, Sparkles, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Briefcase, ArrowLeft, Loader2, Save, Sparkles, CheckCircle, AlertTriangle, Brain, Plus, Wand2, Trash2 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
+import AIGenerateChallengeModal from '@/components/challenges/AIGenerateChallengeModal';
 
 export default function PostJob() {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export default function PostJob() {
   const [challenges, setChallenges] = useState([]);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [showCustomModal, setShowCustomModal] = useState(false);
+  const [showAIChallengeModal, setShowAIChallengeModal] = useState(false);
 
   useEffect(() => {
     User.me().then(setUser);
@@ -65,10 +67,27 @@ export default function PostJob() {
     setChallenges(prev => [...prev, challenge]);
     setShowAIGenerator(false);
     setShowCustomModal(false);
+    setShowAIChallengeModal(false);
   };
   
   const removeChallenge = (index) => {
     setChallenges(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAIChallengeGenerated = async (generatedChallenge) => {
+    // Add the AI-generated challenge to the list
+    const challenge = {
+      id: generatedChallenge.challenge_id,
+      type: 'AI',
+      difficulty: generatedChallenge.difficulty,
+      topic: generatedChallenge.topic,
+      prompt: generatedChallenge.prompt,
+      challenge_type: 'ai_generated',
+      title: `AI Challenge: ${generatedChallenge.topic.replace('_', ' ')}`,
+      description: generatedChallenge.prompt
+    };
+    
+    addChallenge(challenge);
   };
 
   const handlePostJob = async () => {
@@ -242,8 +261,12 @@ export default function PostJob() {
                   <CardDescription>Add challenges to test your candidates' skills.</CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setShowCustomModal(true)}><Plus className="w-4 h-4 mr-2" /> Add Custom</Button>
-                  <Button onClick={() => setShowAIGenerator(!showAIGenerator)}><Wand2 className="w-4 h-4 mr-2" /> Generate with AI</Button>
+                  <Button variant="outline" onClick={() => setShowCustomModal(true)}>
+                    <Plus className="w-4 h-4 mr-2" /> Add Custom
+                  </Button>
+                  <Button onClick={() => setShowAIChallengeModal(true)}>
+                    <Brain className="w-4 h-4 mr-2" /> Generate AI Challenge
+                  </Button>
                 </div>
               </div>
             </CardHeader>
@@ -286,6 +309,15 @@ export default function PostJob() {
             </Button>
           </div>
         </div>
+
+        {/* AI Challenge Generation Modal */}
+        <AIGenerateChallengeModal
+          isOpen={showAIChallengeModal}
+          onClose={() => setShowAIChallengeModal(false)}
+          jobId="temp-job-id" // This will be the actual job ID after creation
+          jobTitle={jobDetails.title || "New Position"}
+          onChallengeGenerated={handleAIChallengeGenerated}
+        />
       </div>
     </div>
   );

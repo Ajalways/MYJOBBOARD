@@ -44,6 +44,7 @@ model User {
   job_posts        JobPost[]
   applications     JobApplication[]
   challenges_created Challenge[]
+  challenge_results ChallengeResult[]
   payments         Payment[]
 
   @@map("users")
@@ -101,36 +102,41 @@ model JobPost {
 
 model Challenge {
   id                    String   @id @default(cuid())
-  job_post_id           String
-  title                 String
-  description           String
-  challenge_type        String   @default("custom")
-  difficulty            String
-  category              String?
-  time_limit_minutes    Int?
-  content_hash          String?  // For duplicate detection
-  created_by_user_id    String
+  job_id                String
+  created_by            String
+  type                  String   // 'AI' or 'CUSTOM'
+  difficulty            String   // 'SIMPLE', 'MEDIUM', 'COMPLEX'
+  topic                 String
+  prompt                String   // the challenge question
+  answer_key            String   // correct solution
+  scoring_rubric        String
   created_at            DateTime @default(now())
-  updated_at            DateTime @updatedAt
 
   // Relations
-  job_post     JobPost @relation(fields: [job_post_id], references: [id], onDelete: Cascade)
-  created_by   User @relation(fields: [created_by_user_id], references: [id])
-  answer_key   AIChallengeAnswerKey?
+  job_post     JobPost @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  created_by_user User @relation(fields: [created_by], references: [id])
+  results      ChallengeResult[]
 
   @@map("challenges")
 }
 
-model AIChallengeAnswerKey {
+model ChallengeResult {
   id                    String   @id @default(cuid())
-  challenge_id          String   @unique
-  correct_answer        String
-  answer_explanation    String?
-  created_at            DateTime @default(now())
+  challenge_id          String
+  application_id        String
+  candidate_id          String
+  submission            String
+  score                 Float?   // numeric 5,2 (allowing null for unscored)
+  feedback              String?
+  flagged               Boolean  @default(false)
+  submitted_at          DateTime @default(now())
 
-  challenge Challenge @relation(fields: [challenge_id], references: [id], onDelete: Cascade)
+  // Relations
+  challenge    Challenge @relation(fields: [challenge_id], references: [id], onDelete: Cascade)
+  application  JobApplication @relation(fields: [application_id], references: [id], onDelete: Cascade)
+  candidate    User @relation(fields: [candidate_id], references: [id], onDelete: Cascade)
 
-  @@map("ai_challenge_answer_keys")
+  @@map("challenge_results")
 }
 
 model JobApplication {
@@ -146,6 +152,7 @@ model JobApplication {
   // Relations
   job_post  JobPost @relation(fields: [job_post_id], references: [id], onDelete: Cascade)
   jobseeker User @relation(fields: [jobseeker_user_id], references: [id], onDelete: Cascade)
+  challenge_results ChallengeResult[]
 
   @@unique([job_post_id, jobseeker_user_id])
   @@map("job_applications")

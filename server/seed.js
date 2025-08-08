@@ -21,6 +21,11 @@ async function main() {
     }
   });
 
+  // Note: Sample/test accounts removed to keep production clean
+  // Only admin account is created by default
+  
+  // Uncomment the code below if you need sample data for development:
+  /*
   // Create sample company
   const companyPassword = await bcrypt.hash('company123', 12);
   const company = await prisma.user.upsert({
@@ -109,6 +114,7 @@ async function main() {
       created_by_user_id: company.id
     }
   });
+  */
 
   // Initialize form fields - Skip for now to get app running
   // const jobseekerFields = [
@@ -131,8 +137,8 @@ async function main() {
 
   console.log('✅ Database seeded successfully!');
   console.log('🔑 Admin login: admin@proofjobs.com / admin123');
-  console.log('🏢 Company login: company@example.com / company123');
-  console.log('👤 Jobseeker login: jobseeker@example.com / jobseeker123');
+  console.log('📝 Note: Sample accounts removed for production cleanliness');
+  console.log('� Tip: Create new accounts through the registration interface');
 }
 
 main()
