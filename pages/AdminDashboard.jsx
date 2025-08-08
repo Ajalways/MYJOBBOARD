@@ -8,6 +8,7 @@ import SkillManagement from '../components/admin/SkillManagement';
 import FormFieldManager from '../components/admin/FormFieldManager';
 import AIChallengeManager from '../components/admin/AIChallengeManager';
 import AIConfiguration from '../components/admin/AIConfiguration';
+import ChallengeManagement from '../components/admin/ChallengeManagement';
 import { Users, Briefcase, UserCheck, BarChart2, Settings, Sparkles, Brain, Zap, Shield, DollarSign, FileText, Activity } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { User as UserEntity } from '@/api/entities';
@@ -112,7 +113,7 @@ export default function AdminDashboard() {
         </header>
 
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-7 mb-6">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 mb-6">
             <TabsTrigger value="overview">
               <BarChart2 className="w-4 h-4 mr-1" />
               Overview
@@ -137,9 +138,13 @@ export default function AdminDashboard() {
               <Settings className="w-4 h-4 mr-1" />
               Forms
             </TabsTrigger>
-            <TabsTrigger value="challenges">
+            <TabsTrigger value="ai-gen">
               <Sparkles className="w-4 h-4 mr-1" />
-              AI Challenges
+              AI Generator
+            </TabsTrigger>
+            <TabsTrigger value="challenges">
+              <Activity className="w-4 h-4 mr-1" />
+              Challenges
             </TabsTrigger>
           </TabsList>
 
@@ -295,8 +300,11 @@ export default function AdminDashboard() {
           <TabsContent value="forms">
             <FormFieldManager />
           </TabsContent>
-          <TabsContent value="challenges">
+          <TabsContent value="ai-gen">
             <AIChallengeManager />
+          </TabsContent>
+          <TabsContent value="challenges">
+            <ChallengeManagement />
           </TabsContent>
         </Tabs>
       </div>

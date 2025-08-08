@@ -255,4 +255,188 @@ router.post('/init-form-fields', authenticateToken, requireAdmin, async (req, re
   }
 });
 
+// === CHALLENGE MANAGEMENT ENDPOINTS ===
+
+// Get all challenges with company information
+router.get('/challenges', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const challenges = await req.prisma.challenge.findMany({
+      include: {
+        job_post: {
+          include: {
+            company: {
+              select: {
+                company_name: true,
+                full_name: true
+              }
+            }
+          }
+        },
+        created_by_user: {
+          select: {
+            full_name: true,
+            email: true
+          }
+        },
+        _count: {
+          select: {
+            results: true
+          }
+        }
+      },
+      orderBy: { created_at: 'desc' }
+    });
+
+    // Format the response with company information
+    const formattedChallenges = challenges.map(challenge => ({
+      ...challenge,
+      title: challenge.prompt?.split('\n')[0] || 'Challenge', // Use first line as title
+      description: challenge.prompt || 'No description available',
+      challenge_type: challenge.type?.toLowerCase() === 'ai' ? 'ai_generated' : 'custom',
+      company_name: challenge.job_post?.company?.company_name || challenge.job_post?.company?.full_name || 'Unknown Company',
+      job_title: challenge.job_post?.title || 'Unknown Position',
+      job_description: challenge.job_post?.description || '',
+      attempt_count: challenge._count?.results || 0,
+      category: challenge.topic || 'general'
+    }));
+
+    res.json({ challenges: formattedChallenges });
+  } catch (error) {
+    console.error('Get admin challenges error:', error);
+    res.status(500).json({ error: 'Failed to fetch challenges' });
+  }
+});
+
+// Get all challenge results with user information
+router.get('/challenge-results', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const results = await req.prisma.challengeResult.findMany({
+      include: {
+        candidate: {
+          select: {
+            full_name: true,
+            email: true
+          }
+        },
+        challenge: {
+          include: {
+            job_post: {
+              include: {
+                company: {
+                  select: {
+                    company_name: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      orderBy: { submitted_at: 'desc' }
+    });
+
+    // Format the response with user information
+    const formattedResults = results.map(result => ({
+      ...result,
+      user_name: result.candidate?.full_name || 'Unknown User',
+      user_email: result.candidate?.email || '',
+      challenge_title: result.challenge?.prompt?.split('\n')[0] || 'Unknown Challenge',
+      company_name: result.challenge?.job_post?.company?.company_name || 'Unknown Company',
+      job_title: result.challenge?.job_post?.title || 'Unknown Position',
+      submission_text: result.submission || '',
+      user_id: result.candidate_id
+    }));
+
+    res.json({ results: formattedResults });
+  } catch (error) {
+    console.error('Get challenge results error:', error);
+    res.status(500).json({ error: 'Failed to fetch challenge results' });
+  }
+});
+
+// Get challenge statistics
+router.get('/challenge-stats', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const stats = await req.prisma.$transaction(async (prisma) => {
+      const totalChallenges = await prisma.challenge.count();
+      const aiChallenges = await prisma.challenge.count({
+        where: { type: 'AI' }
+      });
+      const customChallenges = await prisma.challenge.count({
+        where: { type: 'CUSTOM' }
+      });
+      const totalAttempts = await prisma.challengeResult.count();
+      const averageScore = await prisma.challengeResult.aggregate({
+        _avg: { score: true }
+      });
+      const flaggedResults = await prisma.challengeResult.count({
+        where: {
+          OR: [
+            { score: { lt: 30 } },
+            { feedback: { contains: 'plagiarism' } },
+            { feedback: { contains: 'suspicious' } },
+            { flagged: true }
+          ]
+        }
+      });
+
+      return {
+        totalChallenges,
+        aiChallenges,
+        customChallenges,
+        totalAttempts,
+        averageScore: averageScore._avg.score || 0,
+        flaggedResults
+      };
+    });
+
+    res.json({ stats });
+  } catch (error) {
+    console.error('Get challenge stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch challenge statistics' });
+  }
+});
+
+// Flag/unflag a challenge result
+router.patch('/challenge-results/:id/flag', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { flagged, admin_note } = req.body;
+    
+    const result = await req.prisma.challengeResult.update({
+      where: { id: req.params.id },
+      data: {
+        flagged: flagged,
+        admin_note: admin_note,
+        reviewed_at: new Date(),
+        reviewed_by: req.user.id
+      }
+    });
+
+    res.json({ message: 'Challenge result updated successfully', result });
+  } catch (error) {
+    console.error('Flag challenge result error:', error);
+    res.status(500).json({ error: 'Failed to update challenge result' });
+  }
+});
+
+// Delete a challenge (admin only)
+router.delete('/challenges/:id', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    // First delete all associated challenge results
+    await req.prisma.challengeResult.deleteMany({
+      where: { challenge_id: req.params.id }
+    });
+
+    // Then delete the challenge
+    await req.prisma.challenge.delete({
+      where: { id: req.params.id }
+    });
+
+    res.json({ message: 'Challenge deleted successfully' });
+  } catch (error) {
+    console.error('Delete challenge error:', error);
+    res.status(500).json({ error: 'Failed to delete challenge' });
+  }
+});
+
 export default router;
