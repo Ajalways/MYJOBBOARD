@@ -4,6 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  base: './',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./"),
@@ -12,7 +13,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    minify: 'terser'
+    minify: 'terser',
+    assetsDir: 'assets'
   },
   server: {
     port: 3000,
