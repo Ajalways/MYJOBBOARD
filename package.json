@@ -9,6 +9,7 @@
     "dev:client": "vite",
     "build": "vite build",
     "start": "npm run db:generate && node src/server/index.js",
+    "start:deploy": "npm run db:generate && node index.js",
     "start:prod": "NODE_ENV=production npm run db:generate && node src/server/index.js",
     "preview": "vite preview",
     "db:migrate": "prisma migrate dev",
