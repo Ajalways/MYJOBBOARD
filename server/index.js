@@ -24,6 +24,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const prisma = new PrismaClient();
 
+// Configure trust proxy for rate limiting (required for DigitalOcean/production)
+app.set('trust proxy', 1);
+
 // Test database connection
 prisma.$connect()
   .then(() => {
