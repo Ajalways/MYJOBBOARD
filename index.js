@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Path to the actual server file
-const serverPath = path.join(__dirname, 'src', 'server', 'index.js');
+const serverPath = path.join(__dirname, 'server', 'index.js');
 
 console.log('🚀 Starting ProofJobs server...');
 console.log('📁 Server path:', serverPath);
