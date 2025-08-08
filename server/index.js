@@ -24,6 +24,15 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const prisma = new PrismaClient();
 
+// Test database connection
+prisma.$connect()
+  .then(() => {
+    console.log('✅ Database connected successfully');
+  })
+  .catch((error) => {
+    console.error('❌ Database connection failed:', error);
+  });
+
 // Port configuration - prioritize deployment port 8080, fallback to 3001 for dev
 const PORT = process.env.PORT || 3001;
 
