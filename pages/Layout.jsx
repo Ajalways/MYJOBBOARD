@@ -39,7 +39,7 @@ export default function Layout({ children, currentPageName }) {
     let isMounted = true;
     // Public pages that don't require an immediate user check in the layout.
     // These pages handle their own auth logic or are fully public.
-    const publicPages = ['Home', 'AuthCallback', 'PaymentSuccess', 'PaymentCancel', 'Pricing'];
+    const publicPages = ['Home', 'Auth', 'AuthCallback', 'PaymentSuccess', 'PaymentCancel', 'Pricing'];
 
     const loadUser = async () => {
       try {

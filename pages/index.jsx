@@ -96,6 +96,7 @@ function PagesContent() {
                 
                 
                 <Route path="/Auth" element={<Auth />} />
+                <Route path="/auth" element={<Auth />} />
                 
                 <Route path="/AdminDashboard" element={<AdminDashboard />} />
                 
