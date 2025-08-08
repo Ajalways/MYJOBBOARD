@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Brain, Send, CheckCircle, Clock, AlertCircle, FileText } from 'lucide-react';
-import apiClient from '@/api/client.js';
+import apiClient from '../../api/client.js';
 
 export default function ChallengeSubmission({ 
   jobId, 

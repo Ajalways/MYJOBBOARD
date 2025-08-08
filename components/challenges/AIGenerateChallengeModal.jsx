@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Brain, Sparkles, AlertCircle, CheckCircle } from 'lucide-react';
-import apiClient from '@/api/client.js';
+import apiClient from '../../api/client.js';
 
 export default function AIGenerateChallengeModal({ 
   isOpen, 
