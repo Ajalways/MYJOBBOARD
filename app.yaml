@@ -5,7 +5,7 @@ apps:
   github:
     repo: Ajalways/MYJOBBOARD
     branch: main
-  build_command: cd src && npm install && npm run build
+  build_command: cd src && npm ci && npm run build
   run_command: cd src && npm run start:deploy
   environment_slug: node-js
   instance_count: 1
