@@ -10,9 +10,11 @@ apps:
   environment_slug: node-js
   instance_count: 1
   instance_size_slug: basic-xxs
-  http_port: 5000
+  http_port: 8080
   envs:
   - key: NODE_ENV
     value: production
+  - key: PORT
+    value: "8080"
   - key: DATABASE_URL
     value: file:./prisma/dev.db
