@@ -10,7 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Textarea } from '../ui/textarea';
 import { useToast } from '../ui/use-toast';
-import { api } from '../../api/client';
+import { apiClient } from '../../api/client';
 
 const ChallengeManagement = () => {
   const [challenges, setChallenges] = useState([]);
@@ -60,8 +60,8 @@ const ChallengeManagement = () => {
 
   const fetchChallenges = async () => {
     try {
-      const response = await api.get('/admin/challenges');
-      setChallenges(response.data.challenges || []);
+      const response = await apiClient.get('/admin/challenges');
+      setChallenges(response.challenges || []);
     } catch (error) {
       toast({
         title: "Error",
@@ -73,8 +73,8 @@ const ChallengeManagement = () => {
 
   const fetchChallengeResults = async () => {
     try {
-      const response = await api.get('/admin/challenge-results');
-      setChallengeResults(response.data.results || []);
+      const response = await apiClient.get('/admin/challenge-results');
+      setChallengeResults(response.results || []);
     } catch (error) {
       toast({
         title: "Error",
@@ -113,7 +113,7 @@ const ChallengeManagement = () => {
   const regenerateChallenge = async (challenge) => {
     setRegenerating(challenge.id);
     try {
-      const response = await api.post('/challenges/generate', {
+      const response = await apiClient.post('/challenges/generate', {
         jobTitle: challenge.job_title || 'Forensic Accountant',
         jobDescription: challenge.job_description || challenge.description,
         difficulty: challenge.difficulty.toUpperCase(),
@@ -121,8 +121,8 @@ const ChallengeManagement = () => {
       });
 
       // Update the challenge with new content using the correct schema fields
-      await api.put(`/challenges/${challenge.id}`, {
-        prompt: response.data.title + '\n\n' + response.data.description,
+      await apiClient.put(`/challenges/${challenge.id}`, {
+        prompt: response.title + '\n\n' + response.description,
         type: 'AI',
         updated_at: new Date().toISOString()
       });

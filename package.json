@@ -8,12 +8,12 @@
     "dev:server": "nodemon src/server/index.js",
     "dev:client": "vite",
     "build": "vite build",
-    "start": "npm run db:generate && node server/index.js",
-    "start:prod": "NODE_ENV=production npm run db:generate && node server/index.js",
+    "start": "npm run db:generate && node src/server/index.js",
+    "start:prod": "NODE_ENV=production npm run db:generate && node src/server/index.js",
     "preview": "vite preview",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "db:seed": "node server/seed.js",
+    "db:seed": "node src/server/seed.js",
     "git:push": "git add . && git commit -m \"Auto-commit: $(date)\" && git push",
     "git:push-msg": "git add . && git commit && git push",
     "deploy": "npm run build && npm run git:push"
@@ -90,6 +90,6 @@
     "postcss": "^8.4.45",
     "tailwindcss": "^3.4.10",
     "terser": "^5.43.1",
-    "vite": "^5.4.6"
+    "vite": "^7.1.1"
   }
 }
