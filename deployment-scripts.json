@@ -1,0 +1,7 @@
+{
+  "deploy:build": "npm run build",
+  "deploy:docker": "docker build -t proofjobs .",
+  "deploy:docker-run": "docker run -p 80:80 proofjobs",
+  "deploy:do": "doctl apps create --spec app.yaml",
+  "deploy:update": "doctl apps update $APP_ID --spec app.yaml"
+}

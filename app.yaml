@@ -1,0 +1,10 @@
+name: proof-jobs
+static_sites:
+- name: web
+  source_dir: /
+  github:
+    repo: Ajalways/MYJOBBOARD
+    branch: main
+  build_command: npm run build
+  output_dir: dist
+  environment_slug: node-js
