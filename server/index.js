@@ -24,8 +24,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const prisma = new PrismaClient();
 
-// Port configuration - prioritize deployment port 8080, then 5000, then 3001
-const PORT = process.env.PORT || 8080;
+// Port configuration - prioritize deployment port 8080, fallback to 3001 for dev
+const PORT = process.env.PORT || 3001;
 
 // Validate required environment variables
 if (!process.env.JWT_SECRET) {
@@ -45,7 +45,9 @@ const limiter = rateLimit({
 });
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+}));
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? true // Allow all origins in production (DigitalOcean will handle domain restrictions)
