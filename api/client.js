@@ -38,6 +38,15 @@ class ApiClient {
       
       if (!response.ok) {
         const error = await response.json().catch(() => ({ error: 'Network error' }));
+        
+        // Handle authentication errors
+        if (response.status === 401 || response.status === 403) {
+          // Clear invalid token
+          this.setToken(null);
+          // Throw a specific authentication error
+          throw new Error(error.error || 'Authentication failed');
+        }
+        
         throw new Error(error.error || `HTTP ${response.status}`);
       }
 
@@ -88,7 +97,25 @@ class ApiClient {
   }
 
   async getCurrentUser() {
-    return await this.request('/auth/me');
+    try {
+      return await this.request('/auth/me');
+    } catch (error) {
+      // If getting current user fails, likely authentication issue
+      if (error.message === 'User not found' || error.message.includes('Authentication failed')) {
+        this.setToken(null); // Clear invalid token
+      }
+      throw error;
+    }
+  }
+
+  // Check if user has a valid token
+  isAuthenticated() {
+    return !!this.token;
+  }
+
+  // Clear authentication
+  clearAuth() {
+    this.setToken(null);
   }
 
   async updateUser(updates) {

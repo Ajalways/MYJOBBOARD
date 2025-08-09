@@ -64,6 +64,13 @@ export default function CompanyDashboard() {
       } catch (error) {
         console.error("Error loading dashboard:", error);
         if (isMounted) {
+          // Check if it's an authentication error
+          if (error.message === 'User not found' || error.message.includes('unauthorized') || error.message.includes('invalid token')) {
+            // Clear invalid token and redirect to login
+            localStorage.removeItem('auth_token');
+            window.location.href = createPageUrl("Auth");
+            return;
+          }
           setError("Failed to load dashboard data. Please refresh the page.");
         }
       } finally {
@@ -94,7 +101,18 @@ export default function CompanyDashboard() {
         <div className="text-center">
           <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Dashboard</h2>
           <p className="text-slate-600 mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+          <div className="space-x-4">
+            <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                localStorage.removeItem('auth_token');
+                window.location.href = createPageUrl("Auth");
+              }}
+            >
+              Sign In Again
+            </Button>
+          </div>
         </div>
       </div>
     );
