@@ -35,10 +35,11 @@ export default function Auth() {
       if (response.token) {
         localStorage.setItem('auth_token', response.token);
         
-        // Redirect based on user role
-        if (response.user.role === 'company') {
+        // Redirect based on user role - handle both uppercase and lowercase
+        const userRole = response.user.role.toLowerCase();
+        if (userRole === 'company') {
           window.location.href = createPageUrl("CompanyDashboard");
-        } else if (response.user.role === 'admin') {
+        } else if (userRole === 'admin') {
           window.location.href = createPageUrl("AdminDashboard");
         } else {
           window.location.href = createPageUrl("JobseekerDashboard");
@@ -75,8 +76,9 @@ export default function Auth() {
         // Add a small delay to ensure token is properly stored and processed
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Redirect based on user role
-        if (response.user.role === 'COMPANY') {
+        // Redirect based on user role - handle both uppercase and lowercase
+        const userRole = response.user.role.toLowerCase();
+        if (userRole === 'company') {
           window.location.href = createPageUrl("CompanyDashboard");
         } else {
           window.location.href = createPageUrl("JobseekerDashboard");

@@ -11,9 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Briefcase, ArrowLeft, Loader2, Save, Sparkles, CheckCircle, AlertTriangle, Brain, Plus, Wand2, Trash2 } from 'lucide-react';
+import { Briefcase, ArrowLeft, Loader2, Save, Sparkles, CheckCircle, AlertTriangle, Brain, Plus, Wand2, Trash2, X } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import AIGenerateChallengeModal from '@/components/challenges/AIGenerateChallengeModal';
+import CustomChallengeModal from '@/components/challenges/CustomChallengeModal';
 
 export default function PostJob() {
   const navigate = useNavigate();

@@ -84,21 +84,23 @@ export default function Layout({ children, currentPageName }) {
   const getNavigationItems = () => {
     if (!user) return [];
     
-    if (user.role === 'company') {
+    const userRole = user.role.toLowerCase();
+    
+    if (userRole === 'company') {
       return [
         { title: "Dashboard", url: createPageUrl("CompanyDashboard"), icon: Briefcase },
         { title: "Post Job", url: createPageUrl("PostJob"), icon: Briefcase },
         { title: "Find Talent", url: createPageUrl("FindTalent"), icon: Search },
         { title: "Applications", url: createPageUrl("Applications"), icon: Users },
       ];
-    } else if (user.role === 'jobseeker') {
+    } else if (userRole === 'jobseeker') {
       return [
         { title: "Dashboard", url: createPageUrl("JobseekerDashboard"), icon: User },
         { title: "Browse Jobs", url: createPageUrl("BrowseJobs"), icon: Search },
         { title: "My Applications", url: createPageUrl("MyApplications"), icon: Briefcase },
         { title: "Profile", url: createPageUrl("Profile"), icon: Settings },
       ];
-    } else if (user.role === 'admin') {
+    } else if (userRole === 'admin') {
       return [
         { title: "Dashboard", url: createPageUrl("AdminDashboard"), icon: Briefcase },
         { title: "Users", url: createPageUrl("AdminDashboard?tab=users"), icon: Users },
@@ -206,7 +208,7 @@ export default function Layout({ children, currentPageName }) {
           <SidebarContent className="p-4">
             <SidebarGroup>
               <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
-                {user.role === 'company' ? 'Company Portal' : user.role === 'admin' ? 'Admin Panel' : 'Job Search'}
+                {user.role.toLowerCase() === 'company' ? 'Company Portal' : user.role.toLowerCase() === 'admin' ? 'Admin Panel' : 'Job Search'}
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
@@ -229,7 +231,7 @@ export default function Layout({ children, currentPageName }) {
               </SidebarGroupContent>
             </SidebarGroup>
 
-            {user.role === 'jobseeker' && (
+            {user.role.toLowerCase() === 'jobseeker' && (
               <SidebarGroup>
                 <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
                   Status
@@ -273,7 +275,7 @@ export default function Layout({ children, currentPageName }) {
                         {user.full_name || user.email}
                       </p>
                       <p className="text-xs text-slate-600 truncate capitalize font-medium">
-                        {user.role} {user.role === 'company' && user.company_name ? `• ${user.company_name}` : ''}
+                        {user.role.toLowerCase()} {user.role.toLowerCase() === 'company' && user.company_name ? `• ${user.company_name}` : ''}
                       </p>
                     </div>
                   </div>

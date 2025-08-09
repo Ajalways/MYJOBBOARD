@@ -230,7 +230,7 @@ export default function CustomChallengeModal({ onAddChallenge, onClose }) {
                   <Badge variant="outline">{challenge.category?.replace('_', ' ')}</Badge>
                   <Badge variant="outline">{challenge.time_limit_minutes} min</Badge>
                   {challenge.file_attachments.length > 0 && (
-                    <Badge variant="outline">{challenge file_attachments.length} files</Badge>
+                    <Badge variant="outline">{challenge.file_attachments.length} files</Badge>
                   )}
                 </div>
               </div>

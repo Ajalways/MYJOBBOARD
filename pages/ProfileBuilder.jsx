@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User } from '@/api/entities';
+import { User, UserEntity } from '@/api/entities';
 import { JobseekerBio } from '@/api/entities';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Save, Plus, X } from 'lucide-react';
+import { ArrowLeft, Save, Plus, X, Building2, User as UserIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
@@ -26,8 +26,20 @@ export default function ProfileBuilder() {
     work_preference: '',
     certifications: []
   });
+  // Company profile state
+  const [companyProfile, setCompanyProfile] = useState({
+    company_name: '',
+    description: '',
+    industry: '',
+    company_size: '',
+    location: '',
+    website: '',
+    phone: '',
+    specializations: []
+  });
   const [newSkill, setNewSkill] = useState('');
   const [newCertification, setNewCertification] = useState('');
+  const [newSpecialization, setNewSpecialization] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -35,6 +47,19 @@ export default function ProfileBuilder() {
     'Fraud Detection', 'Forensic Accounting', 'Financial Analysis', 'Data Analytics',
     'Compliance', 'Risk Assessment', 'Investigation', 'Anti-Money Laundering',
     'Excel', 'SQL', 'Python', 'Internal Auditing', 'Cybersecurity'
+  ];
+
+  const commonSpecializations = [
+    'Fraud Investigation',
+    'Asset Recovery',
+    'Forensic Accounting',
+    'Computer Forensics', 
+    'Insurance Claims',
+    'Matrimonial Disputes',
+    'Corporate Investigations',
+    'Compliance Auditing',
+    'Anti-Money Laundering',
+    'Cybersecurity'
   ];
 
   const jobTypes = [
@@ -51,11 +76,26 @@ export default function ProfileBuilder() {
         if (!isMounted) return;
         setUser(currentUser);
 
-        const profiles = await JobseekerBio.filter({ user_id: currentUser.id });
-        if (!isMounted) return;
-        
-        if (profiles.length > 0) {
-          setProfile(profiles[0]);
+        if (currentUser.role.toLowerCase() === 'company') {
+          // Load company profile data from user fields
+          setCompanyProfile({
+            company_name: currentUser.company_name || '',
+            description: currentUser.description || '',
+            industry: currentUser.industry || '',
+            company_size: currentUser.company_size || '',
+            location: currentUser.location || '',
+            website: currentUser.website || '',
+            phone: currentUser.phone || '',
+            specializations: currentUser.specializations || []
+          });
+        } else {
+          // Load jobseeker profile
+          const profiles = await JobseekerBio.filter({ user_id: currentUser.id });
+          if (!isMounted) return;
+          
+          if (profiles.length > 0) {
+            setProfile(profiles[0]);
+          }
         }
       } catch (error) {
         console.error("Error loading profile:", error);
@@ -74,7 +114,28 @@ export default function ProfileBuilder() {
   }, []);
 
   const handleInputChange = (field, value) => {
-    setProfile(prev => ({ ...prev, [field]: value }));
+    if (user?.role.toLowerCase() === 'company') {
+      setCompanyProfile(prev => ({ ...prev, [field]: value }));
+    } else {
+      setProfile(prev => ({ ...prev, [field]: value }));
+    }
+  };
+
+  const addSpecialization = (specialization) => {
+    if (specialization && !companyProfile.specializations.includes(specialization)) {
+      setCompanyProfile(prev => ({ 
+        ...prev, 
+        specializations: [...prev.specializations, specialization] 
+      }));
+    }
+    setNewSpecialization('');
+  };
+
+  const removeSpecialization = (specToRemove) => {
+    setCompanyProfile(prev => ({
+      ...prev,
+      specializations: prev.specializations.filter(spec => spec !== specToRemove)
+    }));
   };
 
   const addSkill = (skill) => {
@@ -123,23 +184,29 @@ export default function ProfileBuilder() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const profileData = {
-        ...profile,
-        user_id: user.id,
-        salary_range_min: profile.salary_range_min ? parseInt(profile.salary_range_min) : null,
-        salary_range_max: profile.salary_range_max ? parseInt(profile.salary_range_max) : null
-      };
-
-      const existingProfiles = await JobseekerBio.filter({ user_id: user.id });
-      
-      if (existingProfiles.length > 0) {
-        await JobseekerBio.update(existingProfiles[0].id, profileData);
+      if (user?.role.toLowerCase() === 'company') {
+        // Save company profile to user fields
+        await UserEntity.updateMyUserData(companyProfile);
+        window.location.href = createPageUrl("CompanyDashboard");
       } else {
-        await JobseekerBio.create(profileData);
-      }
+        // Save jobseeker profile
+        const profileData = {
+          ...profile,
+          user_id: user.id,
+          salary_range_min: profile.salary_range_min ? parseInt(profile.salary_range_min) : null,
+          salary_range_max: profile.salary_range_max ? parseInt(profile.salary_range_max) : null
+        };
 
-      // Redirect back to dashboard
-      window.location.href = createPageUrl("JobseekerDashboard");
+        const existingProfiles = await JobseekerBio.filter({ user_id: user.id });
+        
+        if (existingProfiles.length > 0) {
+          await JobseekerBio.update(existingProfiles[0].id, profileData);
+        } else {
+          await JobseekerBio.create(profileData);
+        }
+
+        window.location.href = createPageUrl("JobseekerDashboard");
+      }
     } catch (error) {
       console.error("Error saving profile:", error);
       alert("Failed to save profile. Please try again.");
@@ -150,45 +217,236 @@ export default function ProfileBuilder() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
       </div>
     );
   }
 
+  const isCompany = user?.role.toLowerCase() === 'company';
+
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <Link to={createPageUrl("JobseekerDashboard")}>
-            <Button variant="ghost" size="sm" className="mb-4">
+        <header className="mb-8">
+          <Link to={createPageUrl(isCompany ? "CompanyDashboard" : "JobseekerDashboard")}>
+            <Button variant="ghost" size="sm" className="mb-4 text-slate-600">
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-slate-900">Build Your Profile</h1>
-          <p className="text-slate-600 mt-1">Create a comprehensive profile to showcase your expertise</p>
-        </div>
+          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+            {isCompany ? <Building2 /> : <UserIcon />}
+            {isCompany ? 'Company Profile' : 'Professional Profile'}
+          </h1>
+          <p className="text-slate-500 mt-1">
+            {isCompany 
+              ? 'Complete your company information to attract top talent'
+              : 'Build your professional profile to stand out to employers'
+            }
+          </p>
+        </header>
 
         <div className="space-y-8">
-          {/* Professional Bio */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Professional Bio</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="bio_text">Tell us about your professional background and expertise</Label>
-                <Textarea
-                  id="bio_text"
-                  value={profile.bio_text}
-                  onChange={(e) => handleInputChange('bio_text', e.target.value)}
-                  placeholder="I am a forensic accountant with 5+ years of experience in fraud detection and financial investigations..."
-                  className="h-32"
-                />
+          {isCompany ? (
+            <>
+              {/* Company Profile Form */}
+              {/* Company Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Company Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="company_name">Company Name *</Label>
+                      <Input
+                        id="company_name"
+                        value={companyProfile.company_name}
+                        onChange={(e) => handleInputChange('company_name', e.target.value)}
+                        placeholder="Your Company Name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="industry">Industry</Label>
+                      <Select value={companyProfile.industry} onValueChange={(value) => handleInputChange('industry', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select industry" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="financial_services">Financial Services</SelectItem>
+                          <SelectItem value="insurance">Insurance</SelectItem>
+                          <SelectItem value="legal">Legal Services</SelectItem>
+                          <SelectItem value="consulting">Consulting</SelectItem>
+                          <SelectItem value="government">Government</SelectItem>
+                          <SelectItem value="technology">Technology</SelectItem>
+                          <SelectItem value="healthcare">Healthcare</SelectItem>
+                          <SelectItem value="retail">Retail</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="company_size">Company Size</Label>
+                      <Select value={companyProfile.company_size} onValueChange={(value) => handleInputChange('company_size', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select company size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1-10">1-10 employees</SelectItem>
+                          <SelectItem value="11-50">11-50 employees</SelectItem>
+                          <SelectItem value="51-200">51-200 employees</SelectItem>
+                          <SelectItem value="201-500">201-500 employees</SelectItem>
+                          <SelectItem value="501-1000">501-1000 employees</SelectItem>
+                          <SelectItem value="1000+">1000+ employees</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="location">Location</Label>
+                      <Input
+                        id="location"
+                        value={companyProfile.location}
+                        onChange={(e) => handleInputChange('location', e.target.value)}
+                        placeholder="City, State/Country"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="website">Website</Label>
+                      <Input
+                        id="website"
+                        value={companyProfile.website}
+                        onChange={(e) => handleInputChange('website', e.target.value)}
+                        placeholder="https://yourcompany.com"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Phone</Label>
+                      <Input
+                        id="phone"
+                        value={companyProfile.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        placeholder="+1 (555) 123-4567"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="description">Company Description</Label>
+                    <Textarea
+                      id="description"
+                      value={companyProfile.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      placeholder="Describe your company, mission, and what makes it unique..."
+                      className="h-32"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Specializations */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Areas of Specialization</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Quick Add Common Specializations</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {commonSpecializations.map((spec) => (
+                        <Button
+                          key={spec}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addSpecialization(spec)}
+                          disabled={companyProfile.specializations.includes(spec)}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          {spec}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Add Custom Specialization</Label>
+                    <div className="flex gap-2 mt-1">
+                      <Input
+                        value={newSpecialization}
+                        onChange={(e) => setNewSpecialization(e.target.value)}
+                        placeholder="Enter a specialization..."
+                      />
+                      <Button onClick={() => addSpecialization(newSpecialization)}>Add</Button>
+                    </div>
+                  </div>
+
+                  {companyProfile.specializations.length > 0 && (
+                    <div>
+                      <Label>Your Specializations</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {companyProfile.specializations.map((spec, index) => (
+                          <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                            {spec}
+                            <X 
+                              className="w-3 h-3 cursor-pointer hover:text-red-500" 
+                              onClick={() => removeSpecialization(spec)}
+                            />
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Save Button */}
+              <div className="flex justify-end">
+                <Button 
+                  size="lg" 
+                  onClick={handleSave} 
+                  disabled={saving || !companyProfile.company_name || !companyProfile.description}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  {saving ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5 mr-2" />
+                      Save Company Profile
+                    </>
+                  )}
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </>
+          ) : (
+            <>
+              {/* Jobseeker Profile Form */}
+              {/* Professional Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Professional Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div>
+                    <Label htmlFor="bio_text">About You *</Label>
+                    <Textarea
+                      id="bio_text"
+                      value={profile.bio_text}
+                      onChange={(e) => handleInputChange('bio_text', e.target.value)}
+                      placeholder="I am a forensic accountant with 5+ years of experience in fraud detection and financial investigations..."
+                      className="h-32"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
           {/* Skills */}
           <Card>
@@ -410,6 +668,8 @@ export default function ProfileBuilder() {
               )}
             </Button>
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>

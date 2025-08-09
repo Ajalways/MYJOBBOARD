@@ -161,10 +161,24 @@ export default function CompanyDashboard() {
               <CardTitle className="text-slate-900">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <Link to={createPageUrl("Profile")}>
+                <Button variant="outline" className="w-full justify-start" size="lg">
+                  <User className="w-5 h-5 mr-3" />
+                  Complete Company Profile
+                </Button>
+              </Link>
+
               <Link to={createPageUrl("PostJob")}>
                 <Button className="w-full justify-start bg-emerald-600 hover:bg-emerald-700" size="lg">
                   <Plus className="w-5 h-5 mr-3" />
                   Post a New Job
+                </Button>
+              </Link>
+
+              <Link to={createPageUrl("PostJobWithAI")}>
+                <Button variant="outline" className="w-full justify-start border-purple-200 text-purple-700 hover:bg-purple-50" size="lg">
+                  <TrendingUp className="w-5 h-5 mr-3" />
+                  Post Job with AI Challenges
                 </Button>
               </Link>
               
@@ -192,19 +206,19 @@ export default function CompanyDashboard() {
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <Badge className="bg-emerald-600 text-white">1</Badge>
-                  <span className="text-sm font-medium text-slate-700">Explore our demo candidates</span>
+                  <span className="text-sm font-medium text-slate-700">Complete your company profile</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge className="bg-slate-200 text-slate-600">2</Badge>
-                  <span className="text-sm text-slate-600">Create your first job posting</span>
+                  <span className="text-sm text-slate-600">Post forensic accounting jobs</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge className="bg-slate-200 text-slate-600">3</Badge>
-                  <span className="text-sm text-slate-600">Set up AI-generated challenges</span>
+                  <span className="text-sm text-slate-600">Generate AI fraud analysis challenges</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge className="bg-slate-200 text-slate-600">4</Badge>
-                  <span className="text-sm text-slate-600">Upgrade to access real candidates</span>
+                  <span className="text-sm text-slate-600">Review qualified candidates</span>
                 </div>
               </div>
 
