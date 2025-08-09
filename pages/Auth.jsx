@@ -72,6 +72,9 @@ export default function Auth() {
       if (response.token) {
         localStorage.setItem('auth_token', response.token);
         
+        // Add a small delay to ensure token is properly stored and processed
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         // Redirect based on user role
         if (response.user.role === 'COMPANY') {
           window.location.href = createPageUrl("CompanyDashboard");

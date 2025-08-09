@@ -75,6 +75,8 @@ class ApiClient {
     
     if (response.token) {
       this.setToken(response.token);
+      // Force a small delay to ensure token is properly stored
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
     
     return response;

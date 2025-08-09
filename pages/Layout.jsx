@@ -43,6 +43,9 @@ export default function Layout({ children, currentPageName }) {
 
     const loadUser = async () => {
       try {
+        // Add a small delay to ensure any recent token storage is complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         const currentUser = await UserEntity.me();
         if (isMounted) {
           setUser(currentUser);
@@ -50,7 +53,8 @@ export default function Layout({ children, currentPageName }) {
       } catch (error) {
         console.log("User not authenticated, redirecting to home page.");
         // Only redirect if we're not already on a public page
-        if (isMounted && !publicPages.includes(currentPageName)) {
+        // Add additional check to prevent immediate redirects on fresh page loads
+        if (isMounted && !publicPages.includes(currentPageName) && !localStorage.getItem('auth_token')) {
           window.location.href = createPageUrl("Home");
         }
       } finally {
