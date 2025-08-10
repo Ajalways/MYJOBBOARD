@@ -179,6 +179,11 @@ router.get('/me', authenticateToken, async (req, res) => {
       }
     });
 
+    if (!user) {
+      console.log('❌ User not found with ID:', req.user.id);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     res.json(user);
   } catch (error) {
     console.error('Get user error:', error);

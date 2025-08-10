@@ -32,6 +32,8 @@ import PaymentCancel from "./PaymentCancel";
 
 import ProfileBuilder from "./ProfileBuilder";
 
+import ClearSession from "./ClearSession";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -67,6 +69,8 @@ const PAGES = {
     PaymentCancel: PaymentCancel,
     
     ProfileBuilder: ProfileBuilder,
+    
+    ClearSession: ClearSession,
     
 }
 
@@ -127,6 +131,8 @@ function PagesContent() {
                 <Route path="/PaymentCancel" element={<PaymentCancel />} />
                 
                 <Route path="/ProfileBuilder" element={<ProfileBuilder />} />
+                
+                <Route path="/ClearSession" element={<ClearSession />} />
                 
             </Routes>
         </Layout>
