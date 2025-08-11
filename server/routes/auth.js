@@ -231,4 +231,50 @@ router.post('/logout', (req, res) => {
   res.json({ message: 'Logged out successfully' });
 });
 
+// Create initial admin user (only if no admin exists)
+router.post('/create-initial-admin', async (req, res) => {
+  try {
+    // Check if any admin user already exists
+    const existingAdmin = await req.prisma.user.findFirst({
+      where: { role: 'ADMIN' }
+    });
+
+    if (existingAdmin) {
+      return res.status(400).json({ error: 'Admin user already exists' });
+    }
+
+    const { email = 'admin@proofjobs.com', password = 'admin123' } = req.body;
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create admin user
+    const adminUser = await req.prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        full_name: 'Admin User',
+        role: 'ADMIN',
+        phone_verified: true,
+        vetting_status: 'approved'
+      },
+      select: {
+        id: true,
+        email: true,
+        full_name: true,
+        role: true
+      }
+    });
+
+    res.json({ 
+      message: 'Admin user created successfully',
+      admin: adminUser,
+      credentials: { email, password }
+    });
+  } catch (error) {
+    console.error('Create admin error:', error);
+    res.status(500).json({ error: 'Failed to create admin user' });
+  }
+});
+
 export default router;

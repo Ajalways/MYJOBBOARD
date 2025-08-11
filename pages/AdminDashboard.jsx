@@ -82,6 +82,16 @@ export default function AdminDashboard() {
       } catch (e) {
         if (isMounted) {
           console.error("Failed to load admin data", e);
+          // Check for authentication errors
+          if (e.message === 'User not found' || 
+              e.message.includes('Authentication failed') || 
+              e.message.includes('unauthorized') || 
+              e.message.includes('invalid token')) {
+            // Clear invalid token and redirect to login
+            localStorage.removeItem('auth_token');
+            window.location.href = createPageUrl("Auth");
+            return;
+          }
           if (e.message.includes('Unauthorized')) {
             navigate(createPageUrl('Home'));
           }

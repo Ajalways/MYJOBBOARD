@@ -2,15 +2,34 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 class ApiClient {
   constructor() {
-    this.token = localStorage.getItem('auth_token');
+    this.token = null;
+    this.initialized = false;
+    this.initializeToken();
+  }
+
+  initializeToken() {
+    // Safely initialize token on client-side only
+    if (typeof window !== 'undefined' && window.localStorage) {
+      this.token = localStorage.getItem('auth_token');
+      this.initialized = true;
+    }
+  }
+
+  getToken() {
+    if (!this.initialized) {
+      this.initializeToken();
+    }
+    return this.token;
   }
 
   setToken(token) {
     this.token = token;
-    if (token) {
-      localStorage.setItem('auth_token', token);
-    } else {
-      localStorage.removeItem('auth_token');
+    if (typeof window !== 'undefined' && window.localStorage) {
+      if (token) {
+        localStorage.setItem('auth_token', token);
+      } else {
+        localStorage.removeItem('auth_token');
+      }
     }
   }
 
@@ -25,41 +44,67 @@ class ApiClient {
       ...options,
     };
 
-    if (this.token) {
-      config.headers.Authorization = `Bearer ${this.token}`;
+    const token = this.getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     if (config.body && typeof config.body === 'object') {
       config.body = JSON.stringify(config.body);
     }
 
-    try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Network error' }));
+    // Retry mechanism for network issues
+    let lastError;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const response = await fetch(url, config);
         
-        // Handle authentication errors
-        if (response.status === 401 || response.status === 403) {
-          // Clear invalid token
-          this.setToken(null);
-          // Throw a specific authentication error
-          throw new Error(error.error || 'Authentication failed');
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({ error: 'Network error' }));
+          
+          // Handle authentication errors
+          if (response.status === 401 || response.status === 403) {
+            // Clear invalid token
+            this.setToken(null);
+            // Throw a specific authentication error
+            throw new Error(error.error || 'Authentication failed');
+          }
+          
+          // For server errors, retry
+          if (response.status >= 500 && attempt < 3) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            continue;
+          }
+          
+          throw new Error(error.error || `HTTP ${response.status}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          return await response.json();
         }
         
-        throw new Error(error.error || `HTTP ${response.status}`);
+        return response.text();
+      } catch (error) {
+        lastError = error;
+        
+        // Don't retry authentication errors or client errors
+        if (error.message.includes('Authentication failed') || 
+            error.message.includes('400') || 
+            error.message.includes('404')) {
+          break;
+        }
+        
+        // For network errors, retry with exponential backoff
+        if (attempt < 3) {
+          console.warn(`API request failed (attempt ${attempt}), retrying...`, error.message);
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
       }
-
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        return await response.json();
-      }
-      
-      return response.text();
-    } catch (error) {
-      console.error(`API Error (${endpoint}):`, error);
-      throw error;
     }
+
+    console.error(`API Error (${endpoint}):`, lastError);
+    throw lastError;
   }
 
   // Auth methods

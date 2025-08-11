@@ -58,9 +58,39 @@ export default function Home() {
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
       }}></div>
       
+      {/* Navigation Header */}
+      <div className="relative z-20 w-full">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-2xl font-bold text-white">ProofAndFit</span>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost"
+                onClick={handleLogin}
+                className="text-white hover:text-emerald-400 hover:bg-slate-800/50"
+              >
+                Login
+              </Button>
+              <Button 
+                onClick={handleLogin}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg"
+              >
+                Sign Up
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       {/* Hero Section */}
       <div className="relative z-10">
-        <div className="container mx-auto px-4 pt-20 pb-16">
+        <div className="container mx-auto px-4 pt-12 pb-16">{/* Reduced top padding since we have nav now */}
           {/* Header */}
           <div className="text-center mb-16">
             <div className="flex items-center justify-center gap-3 mb-6">

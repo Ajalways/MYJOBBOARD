@@ -26,14 +26,17 @@ export default function Auth() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (loading) return; // Prevent double submission
+    
     setLoading(true);
     setError('');
 
     try {
       const response = await apiClient.login(loginForm.email, loginForm.password);
       
-      if (response.token) {
-        localStorage.setItem('auth_token', response.token);
+      if (response.token && response.user) {
+        // Add a small delay to ensure token is properly stored by apiClient
+        await new Promise(resolve => setTimeout(resolve, 100));
         
         // Redirect based on user role - handle both uppercase and lowercase
         const userRole = response.user.role.toLowerCase();
@@ -44,6 +47,8 @@ export default function Auth() {
         } else {
           window.location.href = createPageUrl("JobseekerDashboard");
         }
+      } else {
+        throw new Error('Invalid login response');
       }
     } catch (err) {
       setError(err.message || 'Login failed');
@@ -54,6 +59,8 @@ export default function Auth() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (loading) return; // Prevent double submission
+    
     setLoading(true);
     setError('');
 
@@ -70,11 +77,9 @@ export default function Auth() {
       
       const response = await apiClient.register(registrationData);
       
-      if (response.token) {
-        localStorage.setItem('auth_token', response.token);
-        
-        // Add a small delay to ensure token is properly stored and processed
-        await new Promise(resolve => setTimeout(resolve, 500));
+      if (response.token && response.user) {
+        // Add a small delay to ensure token is properly stored by apiClient
+        await new Promise(resolve => setTimeout(resolve, 200));
         
         // Redirect based on user role - handle both uppercase and lowercase
         const userRole = response.user.role.toLowerCase();
@@ -83,6 +88,8 @@ export default function Auth() {
         } else {
           window.location.href = createPageUrl("JobseekerDashboard");
         }
+      } else {
+        throw new Error('Invalid registration response');
       }
     } catch (err) {
       setError(err.message || 'Registration failed');
